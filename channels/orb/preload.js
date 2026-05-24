@@ -67,4 +67,7 @@ contextBridge.exposeInMainWorld('lucy', {
 
   // Uso de sesión de 5 horas (tokens + costo estimado)
   getSessionUsage: () => ipcRenderer.invoke('get-session-usage'),
+
+  // Nombre del agente (cargado desde config.json)
+  getAgentName: () => ipcRenderer.invoke('get-agent-name'),
 })

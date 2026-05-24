@@ -9,6 +9,6 @@ channels/orb/dist/
 *.log
 .DS_Store
 Thumbs.db
-config.json
+/config.json
 channels/telegram/allowlist.json
 .claude/

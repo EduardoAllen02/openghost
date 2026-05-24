@@ -1,0 +1,10 @@
+{
+  "agentName": "Agent",
+  "daemonUrl": "http://127.0.0.1:8787",
+  "daemonToken": "",
+  "ttsUrl": "http://127.0.0.1:5052/v1/audio/speech",
+  "ttsVoice": "0f0e1d637b77425698158ff4109d1829",
+  "ttsModel": "speech-1.6",
+  "ttsProxyPort": 5052,
+  "orbServerPort": 8766
+}

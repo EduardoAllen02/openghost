@@ -1203,7 +1203,7 @@
     wrap.className = `chat-bubble ${role}`
     const label = document.createElement('div')
     label.className = 'role-label'
-    label.textContent = role === 'user' ? 'Tú' : 'Lucy'
+    label.textContent = role === 'user' ? 'Tú' : AGENT_NAME
     const body = document.createElement('div')
     if (role === 'assistant') {
       body.innerHTML = markdownToHtml(stripTtsTags(text))
@@ -1237,7 +1237,7 @@
       btnGateway.classList.remove('running')
       btnGateway.textContent = 'Gateway'
     } else {
-      lastMsgEl.textContent = 'Lucy lista'
+      lastMsgEl.textContent = `${AGENT_NAME} lista`
       btnGateway.classList.add('running')
       btnGateway.textContent = 'Online'
     }
@@ -1264,7 +1264,7 @@
     addChatBubble(role, text)
     if (role === 'assistant') {
       const clean = stripTtsTags(text)
-      lastMsgEl.textContent = `Lucy: ${clean.length > 80 ? clean.slice(0, 80) + '…' : clean}`
+      lastMsgEl.textContent = `${AGENT_NAME}: ${clean.length > 80 ? clean.slice(0, 80) + '…' : clean}`
     } else {
       lastMsgEl.textContent = `Tú: ${text}`
     }
@@ -1280,6 +1280,22 @@
     if (!online) console.log('[net] Offline — TTS deshabilitado')
   })
 
+
+  // ── Nombre del agente (cargado desde config.json vía IPC) ────────────────────
+  let AGENT_NAME = 'Agent'
+
+  function applyAgentName(name) {
+    AGENT_NAME = name
+    const titleEl = document.getElementById('title-name')
+    if (titleEl) titleEl.textContent = name
+    document.title = name
+    const inputEl2 = document.getElementById('chat-input')
+    if (inputEl2) inputEl2.placeholder = `Habla con ${name}...`
+  }
+
+  window.lucy?.getAgentName().then(name => {
+    if (name) applyAgentName(name)
+  }).catch(() => {})
 
   // ── Estado inicial ────────────────────────────────────────────────────────────
   setState('idle', 0)

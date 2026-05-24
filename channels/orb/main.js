@@ -560,6 +560,8 @@ function getSessionUsage() {
 
 ipcMain.handle('get-session-usage', () => getSessionUsage())
 
+ipcMain.handle('get-agent-name', () => CFG.agentName || 'Agent')
+
 // ── App lifecycle ─────────────────────────────────────────────────────────────
 app.whenReady().then(() => {
   createWindow()
