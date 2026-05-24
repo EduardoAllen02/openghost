@@ -735,22 +735,22 @@
       case 'vad':
         btnMic.classList.add('mic-vad')
         btnMic.textContent = 'VAD'
-        btnMic.title = 'VAD activo — click para PTT'
+        btnMic.title = 'VAD active — click for PTT'
         break
       case 'recording':
         btnMic.classList.add('mic-recording')
         btnMic.textContent = 'REC'
-        btnMic.title = 'Grabando...'
+        btnMic.title = 'Recording...'
         break
       case 'ptt':
         btnMic.classList.add('mic-ptt')
         btnMic.textContent = 'PTT'
-        btnMic.title = 'PTT — mantén Alt para hablar — click para OFF'
+        btnMic.title = 'PTT — hold Alt to speak — click for OFF'
         break
       case 'off':
       default:
         btnMic.textContent = 'MIC'
-        btnMic.title = 'Mic inactivo (claps activos) — click para VAD'
+        btnMic.title = 'Mic inactive (claps active) — click for VAD'
     }
   }
 
@@ -930,12 +930,12 @@
 
   btnGateway.addEventListener('click', () => {
     window.lucy?.startGateway()
-    sendToLogs('Gateway: iniciando...', 'info')
+    sendToLogs('Gateway: starting...', 'info')
   })
 
   btnNew.addEventListener('click', () => {
     window.lucy?.newSession()
-    lastMsgEl.textContent = 'Nueva sesión iniciada'
+    lastMsgEl.textContent = 'New session started'
   })
 
   // ── File attachments ──────────────────────────────────────────────────────────
@@ -1203,7 +1203,7 @@
     wrap.className = `chat-bubble ${role}`
     const label = document.createElement('div')
     label.className = 'role-label'
-    label.textContent = role === 'user' ? 'Tú' : AGENT_NAME
+    label.textContent = role === 'user' ? 'You' : AGENT_NAME
     const body = document.createElement('div')
     if (role === 'assistant') {
       body.innerHTML = markdownToHtml(stripTtsTags(text))
@@ -1220,7 +1220,7 @@
     chatHistory.innerHTML = ''
     const empty = document.createElement('div')
     empty.id = 'chat-empty'
-    empty.textContent = 'Sin mensajes aún'
+    empty.textContent = 'No messages yet'
     chatHistory.appendChild(empty)
   }
 
@@ -1233,11 +1233,11 @@
     updateStatusDot(currentStateName, connected)
     if (!connected) {
       setState('idle', 0)
-      lastMsgEl.textContent = 'Gateway offline — presiona "Gateway" para iniciar'
+      lastMsgEl.textContent = 'Gateway offline — press "Gateway" to start'
       btnGateway.classList.remove('running')
       btnGateway.textContent = 'Gateway'
     } else {
-      lastMsgEl.textContent = `${AGENT_NAME} lista`
+      lastMsgEl.textContent = `${AGENT_NAME} ready`
       btnGateway.classList.add('running')
       btnGateway.textContent = 'Online'
     }
@@ -1266,18 +1266,18 @@
       const clean = stripTtsTags(text)
       lastMsgEl.textContent = `${AGENT_NAME}: ${clean.length > 80 ? clean.slice(0, 80) + '…' : clean}`
     } else {
-      lastMsgEl.textContent = `Tú: ${text}`
+      lastMsgEl.textContent = `You: ${text}`
     }
   })
 
   window.lucy?.onClearChat(() => {
     clearChatHistory()
-    lastMsgEl.textContent = 'Nueva sesión iniciada'
+    lastMsgEl.textContent = 'New session started'
   })
 
   window.lucy?.onConnectivity(({ online }) => {
     if (offlineBadge) offlineBadge.classList.toggle('visible', !online)
-    if (!online) console.log('[net] Offline — TTS deshabilitado')
+    if (!online) console.log('[net] Offline — TTS disabled')
   })
 
 
@@ -1290,7 +1290,9 @@
     if (titleEl) titleEl.textContent = name
     document.title = name
     const inputEl2 = document.getElementById('chat-input')
-    if (inputEl2) inputEl2.placeholder = `Habla con ${name}...`
+    if (inputEl2) inputEl2.placeholder = `Talk to ${name}...`
+    const inputTab2 = document.getElementById('chat-input-tab')
+    if (inputTab2) inputTab2.placeholder = `Talk to ${name}...`
   }
 
   window.lucy?.getAgentName().then(name => {
@@ -1299,6 +1301,6 @@
 
   // ── Estado inicial ────────────────────────────────────────────────────────────
   setState('idle', 0)
-  lastMsgEl.textContent = 'Iniciando...'
+  lastMsgEl.textContent = 'Starting...'
 
 })()
