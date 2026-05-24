@@ -1,0 +1,55 @@
+{
+  "version": "1.0.0",
+  "workspace_dir": "/path/to/your/openghost-workspace",
+  "base_dir": "/path/to/your/home",
+  "daemon": {
+    "port": 8787,
+    "host": "127.0.0.1",
+    "session_timeout_days": 15,
+    "queue_max_size": 50
+  },
+  "claude": {
+    "command": "claude",
+    "timeout_seconds": 480
+  },
+  "channels": {
+    "telegram": {
+      "enabled": false,
+      "token_env": "TELEGRAM_BOT_TOKEN",
+      "allowlist_file": "channels/telegram/allowlist.json"
+    },
+    "orb": {
+      "enabled": false,
+      "token_env": "ORB_TOKEN"
+    }
+  },
+  "tts": {
+    "enabled": true,
+    "provider": "fish",
+    "proxy_port": 5052,
+    "fish": {
+      "api_key_env": "FISH_API_KEY",
+      "voice_id": "YOUR_FISH_AUDIO_VOICE_ID",
+      "model": "speech-1.6"
+    },
+    "openai": {
+      "api_key_env": "OPENAI_API_KEY",
+      "voice": "alloy",
+      "model": "tts-1"
+    },
+    "elevenlabs": {
+      "api_key_env": "ELEVENLABS_API_KEY",
+      "voice_id": "",
+      "model": "eleven_multilingual_v2"
+    }
+  },
+  "heartbeat": {
+    "enabled": true,
+    "interval_minutes": 15
+  },
+  "wake_on_lan": {
+    "enabled": false,
+    "mac_address": "",
+    "broadcast": "255.255.255.255"
+  }
+}

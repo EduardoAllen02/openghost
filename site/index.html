@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenGhost — Agentic AI Framework</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+    :root {
+      --bg: #080808;
+      --bg2: #0f0f0f;
+      --bg3: #141414;
+      --border: #1e1e1e;
+      --border2: #2a2a2a;
+      --text: #e8e8e8;
+      --text2: #888;
+      --text3: #555;
+      --accent: #00e5c3;
+      --accent2: #00b89e;
+      --accent-dim: rgba(0, 229, 195, 0.08);
+      --accent-glow: rgba(0, 229, 195, 0.15);
+      --red: #ff3c5f;
+      --white: #ffffff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 56px;
+      background: rgba(8,8,8,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: 0.05em;
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.8rem;
+      color: var(--text2);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ── Hero ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 120px 0 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.3;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+    }
+
+    .hero-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .hero-tag::before {
+      content: '';
+      display: block;
+      width: 24px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    h1 {
+      font-size: clamp(3.5rem, 10vw, 8rem);
+      font-weight: 700;
+      line-height: 0.9;
+      letter-spacing: -0.03em;
+      color: var(--white);
+      margin-bottom: 2rem;
+    }
+
+    h1 .accent { color: var(--accent); }
+
+    .hero-desc {
+      max-width: 560px;
+      font-size: 1.1rem;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      border: 1px solid;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent2);
+      border-color: var(--accent2);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--border2);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .stat-val {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 0.25rem;
+    }
+
+    /* ── Sections ── */
+    section {
+      padding: 6rem 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .section-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-lead {
+      font-size: 1.05rem;
+      color: var(--text2);
+      max-width: 640px;
+      line-height: 1.75;
+      margin-bottom: 3rem;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 0.75rem;
+    }
+
+    p { color: var(--text2); line-height: 1.75; }
+
+    /* ── Philosophy Cards ── */
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 3rem;
+    }
+
+    .principle {
+      background: var(--bg);
+      padding: 2rem;
+      transition: background 0.2s;
+    }
+
+    .principle:hover { background: var(--bg2); }
+
+    .principle-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      margin-bottom: 1rem;
+    }
+
+    .principle h3 { margin-bottom: 0.5rem; }
+
+    /* ── Architecture ── */
+    .arch-diagram {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      padding: 2rem;
+      overflow-x: auto;
+      margin: 2rem 0;
+    }
+
+    .arch-diagram pre {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text2);
+      line-height: 1.8;
+      white-space: pre;
+    }
+
+    .arch-diagram pre .hl { color: var(--accent); }
+
+    /* ── Memory Table ── */
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 2rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text3);
+      border-bottom: 1px solid var(--border2);
+    }
+
+    td {
+      padding: 0.875rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text2);
+      vertical-align: top;
+    }
+
+    td:first-child {
+      font-family: 'Space Mono', monospace;
+      color: var(--accent);
+      font-size: 0.8rem;
+    }
+
+    tr:hover td { background: var(--bg2); }
+
+    /* ── Skills Grid ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    .skill-card {
+      background: var(--bg);
+      padding: 1.75rem;
+      transition: background 0.2s;
+    }
+
+    .skill-card:hover { background: var(--bg2); }
+
+    .skill-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 0.2rem 0.6rem;
+      display: inline-block;
+      margin-bottom: 1rem;
+      letter-spacing: 0.1em;
+    }
+
+    .skill-card h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+
+    /* ── Protocols ── */
+    .protocol-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    .protocol-item {
+      background: var(--bg);
+      padding: 1.5rem 2rem;
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+      transition: background 0.2s;
+    }
+
+    .protocol-item:hover { background: var(--bg2); }
+
+    .protocol-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--accent);
+      min-width: 160px;
+      padding-top: 0.15rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Install ── */
+    .install-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+
+    .install-step {
+      background: var(--bg);
+      padding: 1.5rem 2rem;
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .step-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--border2);
+      line-height: 1;
+    }
+
+    .step-content h3 { margin-bottom: 0.5rem; font-size: 1rem; }
+
+    code {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      padding: 0.15rem 0.4rem;
+      color: var(--accent);
+    }
+
+    pre {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      padding: 1.25rem 1.5rem;
+      overflow-x: auto;
+      margin-top: 0.75rem;
+    }
+
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.78rem;
+      color: var(--text2);
+    }
+
+    /* ── Context Engineering ── */
+    .context-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+
+    .context-col {
+      background: var(--bg);
+      padding: 2rem;
+    }
+
+    .context-col h3 { margin-bottom: 1rem; color: var(--white); }
+
+    .context-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .context-list li {
+      font-size: 0.875rem;
+      color: var(--text2);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .context-list li::before {
+      content: '—';
+      color: var(--accent);
+      flex-shrink: 0;
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .footer-logo span { color: var(--accent); }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-size: 0.75rem;
+      color: var(--text3);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--accent); }
+
+    .footer-copy {
+      font-size: 0.75rem;
+      color: var(--text3);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 1.25rem; }
+      .nav-links { display: none; }
+      .container { padding: 0 1.25rem; }
+      h1 { font-size: 3rem; }
+      .hero-stats { gap: 2rem; }
+      .context-split { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+      .protocol-item { flex-direction: column; gap: 0.5rem; }
+      .protocol-name { min-width: unset; }
+      .install-step { grid-template-columns: 1fr; }
+      .step-num { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Nav ── -->
+<nav>
+  <a href="#" class="nav-logo">OPEN<span>GHOST</span></a>
+  <ul class="nav-links">
+    <li><a href="#philosophy">Philosophy</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#context">Context</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#protocols">Protocols</a></li>
+    <li><a href="#install">Install</a></li>
+  </ul>
+</nav>
+
+<!-- ── Hero ── -->
+<section id="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="container">
+    <div class="hero-tag">Agentic AI Framework</div>
+    <h1>OPEN<br><span class="accent">GHOST</span></h1>
+    <p class="hero-desc">
+      A framework for running a persistent, autonomous AI agent on your own machine.
+      Real device access. Modular skills. Multi-channel communication.
+      Built from scratch, inspired by OpenClaw.
+    </p>
+    <div class="hero-actions">
+      <a href="#install" class="btn btn-primary">Get Started</a>
+      <a href="https://github.com/EduardoAllen02/openghost" target="_blank" class="btn btn-ghost">GitHub →</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-val">2</div>
+        <div class="stat-label">Channels</div>
+      </div>
+      <div>
+        <div class="stat-val">N+</div>
+        <div class="stat-label">Modular Skills</div>
+      </div>
+      <div>
+        <div class="stat-val">5</div>
+        <div class="stat-label">Memory Layers</div>
+      </div>
+      <div>
+        <div class="stat-val">0</div>
+        <div class="stat-label">Orchestration Overhead</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Philosophy ── -->
+<section id="philosophy">
+  <div class="container">
+    <div class="section-tag">01 — Philosophy</div>
+    <h2>Inspired by OpenClaw.<br>Built from scratch.</h2>
+    <p class="section-lead">
+      OpenGhost follows the core idea that a capable AI agent doesn't need a complex
+      orchestration framework — it needs a well-designed workspace and clear instructions.
+      The foundation is a single markdown file. Everything else follows from that.
+    </p>
+    <div class="principles">
+      <div class="principle">
+        <div class="principle-num">01</div>
+        <h3>Context by Reference</h3>
+        <p>The agent reads what it needs, when it needs it. No token bloat. No injecting the entire world into every prompt.</p>
+      </div>
+      <div class="principle">
+        <div class="principle-num">02</div>
+        <h3>Files Over RAM</h3>
+        <p>Memory that matters goes to disk. Mental notes don't survive restarts. Files do. Text beats ephemeral memory every time.</p>
+      </div>
+      <div class="principle">
+        <div class="principle-num">03</div>
+        <h3>Operator-Defined Identity</h3>
+        <p>The agent's personality, values, and rules are written by the operator in plain markdown — not hardcoded into the engine.</p>
+      </div>
+      <div class="principle">
+        <div class="principle-num">04</div>
+        <h3>Real Access, Clear Guardrails</h3>
+        <p>Full device access with safety from explicit rules in AGENTS.md — not sandboxing. Trust is earned, scope is bounded.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Architecture ── -->
+<section id="architecture">
+  <div class="container">
+    <div class="section-tag">02 — Architecture</div>
+    <h2>Two repos.<br>One system.</h2>
+    <p class="section-lead">
+      The engine and the workspace are separated by design. The engine knows nothing
+      about the agent — only where its workspace lives. This makes OpenGhost reusable
+      across any number of agent instances.
+    </p>
+    <div class="arch-diagram">
+      <pre>
+  User
+    │
+    ├── Telegram ──────────────────┐
+    └── Voice Orb (Electron) ──────┤
+                                    ▼
+                            daemon.py :8787
+                            Flask HTTP + Telegram bot
+                                    │
+                            AllowList check
+                                    │
+                            context_builder.py
+                            Builds: [SYSTEM] + [WORKSPACE] + [MESSAGE]
+                                    │
+                            session_manager.py
+                            new day → fresh session  |  same day → --continue
+                                    │
+                            wake_claude.py
+                            subprocess: claude --dangerously-skip-permissions
+                            cwd: workspace_dir
+                                    │
+                            Claude Code CLI
+                            Reads AGENTS.md → acts
+                                    │
+                  ┌─────────────────┴─────────────────┐
+                  │                                   │
+            text to channel                    [[tts:text]] tags
+            Telegram / HTTP / orb              → tts-proxy :5052
+                                               → Fish / OpenAI / ElevenLabs
+                                               → MP3 → orb plays audio
+      </pre>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>File</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>daemon.py</td>
+            <td>core/daemon.py</td>
+            <td>Flask HTTP server + Telegram bot thread. One message at a time via threading.Lock()</td>
+          </tr>
+          <tr>
+            <td>session_manager</td>
+            <td>core/session_manager.py</td>
+            <td>Tracks session date. New day → fresh Claude session. Same day → --continue</td>
+          </tr>
+          <tr>
+            <td>context_builder</td>
+            <td>core/context_builder.py</td>
+            <td>Builds the system prompt and parses [[tts:text]] tags from Claude's response</td>
+          </tr>
+          <tr>
+            <td>wake_claude</td>
+            <td>core/wake_claude.py</td>
+            <td>Invokes Claude Code CLI as a subprocess. cwd = workspace_dir</td>
+          </tr>
+          <tr>
+            <td>tts-proxy</td>
+            <td>tts-proxy/proxy.py</td>
+            <td>OpenAI-compatible /v1/audio/speech endpoint routing to Fish / OpenAI / ElevenLabs</td>
+          </tr>
+          <tr>
+            <td>Voice Orb</td>
+            <td>channels/orb/</td>
+            <td>Electron app — mic input, clap detection, TTS audio playback</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ── Context Engineering ── -->
+<section id="context">
+  <div class="container">
+    <div class="section-tag">03 — Context Engineering</div>
+    <h2>The primordial file:<br>AGENTS.md</h2>
+    <p class="section-lead">
+      Every session starts by reading AGENTS.md from the workspace. It's the single source
+      of truth for who the agent is, what to read on startup, what it can and can't do, and
+      how to format responses per channel.
+    </p>
+
+    <div class="context-split">
+      <div class="context-col">
+        <h3>What the prompt includes</h3>
+        <ul class="context-list">
+          <li>System declaration (channel + anti-injection)</li>
+          <li>Workspace path + "read AGENTS.md"</li>
+          <li>The user's message</li>
+          <li>Optional context snapshot (when relevant)</li>
+        </ul>
+      </div>
+      <div class="context-col">
+        <h3>What stays out of the prompt</h3>
+        <ul class="context-list">
+          <li>Contents of SOUL.md (agent reads it)</li>
+          <li>Contents of MEMORY.md (agent reads it)</li>
+          <li>Past conversation history (in --continue)</li>
+          <li>System state (only injected when relevant)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Memory Layer</th>
+            <th>File</th>
+            <th>Written By</th>
+            <th>Loaded When</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Active session</td>
+            <td>Claude Code --continue</td>
+            <td>Automatic</td>
+            <td>Every message (same day)</td>
+          </tr>
+          <tr>
+            <td>Daily log</td>
+            <td>memory/YYYY-MM-DD.md</td>
+            <td>Agent during session</td>
+            <td>Session startup, step 4</td>
+          </tr>
+          <tr>
+            <td>Long-term</td>
+            <td>MEMORY.md</td>
+            <td>Agent during heartbeats</td>
+            <td>Session startup, step 5</td>
+          </tr>
+          <tr>
+            <td>Identity</td>
+            <td>SOUL.md + IDENTITY.md</td>
+            <td>You (initial setup)</td>
+            <td>Session startup, steps 1-2</td>
+          </tr>
+          <tr>
+            <td>User profile</td>
+            <td>USER.md</td>
+            <td>You + agent updates</td>
+            <td>Session startup, step 3</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:2rem;">
+      <h3 style="margin-bottom:1rem;">Anti-Injection Protocol</h3>
+      <p style="max-width:640px;">
+        The agent has full device access. A malicious web page could try to redirect it with
+        text like "ignore previous instructions." OpenGhost counters this by declaring — in every
+        prompt and in AGENTS.md — that only authorized channels have authority. External content
+        (HTML, API responses, downloads, emails) never has operator-level trust.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Skills ── -->
+<section id="skills">
+  <div class="container">
+    <div class="section-tag">04 — Skills</div>
+    <h2>Modular capabilities.<br>Live in the workspace.</h2>
+    <p class="section-lead">
+      Skills travel with the agent, not the engine. Each skill is a folder with a
+      <code>SKILL.md</code> that tells the agent when to use it and how. Support scripts are optional.
+    </p>
+
+    <div class="skills-grid">
+      <div class="skill-card">
+        <div class="skill-tag">INCLUDED</div>
+        <h3>browser</h3>
+        <p>Chrome control via CDP. Navigate URLs, read HTML, execute JS, interact with forms, take screenshots.</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-tag">INCLUDED</div>
+        <h3>gog</h3>
+        <p>Google Workspace CLI. Gmail, Calendar, Drive, Docs, Sheets — read and write.</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-tag">REFERENCE</div>
+        <h3>spotify</h3>
+        <p>Playback control via Spotify Web API with OAuth refresh token. Play, pause, skip, queue.</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-tag">REFERENCE</div>
+        <h3>canva</h3>
+        <p>Create and export designs via Canva MCP. Posts, stories, banners, presentations.</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-tag">ADD YOUR OWN</div>
+        <h3>Custom Skills</h3>
+        <p>Create a folder in <code>skills/</code>, write <code>SKILL.md</code>, add to <code>SKILLS.md</code>. That's it.</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-tag">COMPATIBLE</div>
+        <h3>OpenClaw Skills</h3>
+        <p>OpenClaw has 52+ skills. Copy any skill folder into your workspace and update the index.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Protocols ── -->
+<section id="protocols">
+  <div class="container">
+    <div class="section-tag">05 — Protocols</div>
+    <h2>Named behaviors.<br>Written in markdown.</h2>
+    <p class="section-lead">
+      Protocols are sections in AGENTS.md that define exact behaviors for specific triggers or events.
+      No code, no special syntax — if the agent can read it, it can follow it.
+    </p>
+
+    <div class="protocol-list">
+      <div class="protocol-item">
+        <div class="protocol-name">Daddy's Home</div>
+        <p>Triggered by a clap-detection event from the voice orb. Starts welcome playlist via Spotify, fetches weather, checks heartbeat tasks and pending items, greets with local time. Response in TTS audio.</p>
+      </div>
+      <div class="protocol-item">
+        <div class="protocol-name">Heartbeat</div>
+        <p>Runs on a configurable interval. Executes queued tasks from heartbeat.md, removes completed ones, notifies via Telegram, and periodically distills daily logs into MEMORY.md.</p>
+      </div>
+      <div class="protocol-item">
+        <div class="protocol-name">Anti-Injection</div>
+        <p>Always active. Content from external sources — web pages, API responses, downloaded files, emails — has no authority over the agent. Injection attempts are flagged and ignored.</p>
+      </div>
+      <div class="protocol-item">
+        <div class="protocol-name">Channel Formatting</div>
+        <p>Different response formats per channel: Telegram text (no TTS tags, no markdown tables), Telegram voice (TTS tags, conversational), Orb (TTS tags, max 3-4 sentences, no code inside tags).</p>
+      </div>
+      <div class="protocol-item">
+        <div class="protocol-name">Memory Distillation</div>
+        <p>Every few days during a heartbeat: read recent daily logs, extract what matters long-term, update MEMORY.md, prune what's stale. Diary = raw notes. MEMORY.md = distilled wisdom.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Install ── -->
+<section id="install">
+  <div class="container">
+    <div class="section-tag">06 — Installation</div>
+    <h2>Up and running<br>in minutes.</h2>
+    <p class="section-lead">
+      Prerequisites: Python 3.12+ and Claude Code CLI
+      (<code>npm i -g @anthropic-ai/claude-code</code>).
+    </p>
+
+    <div class="install-steps">
+      <div class="install-step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h3>Clone the engine</h3>
+          <pre><code>git clone https://github.com/EduardoAllen02/openghost.git
+cd openghost</code></pre>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h3>Bootstrap your workspace</h3>
+          <pre><code>cp -r workspace_template ../openghost-workspace</code></pre>
+          <p style="margin-top:0.5rem; font-size:0.875rem;">Then fill in <code>SOUL.md</code>, <code>IDENTITY.md</code>, and <code>USER.md</code> with your agent's identity.</p>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h3>Configure the engine</h3>
+          <pre><code>cp config.example.json config.json
+# Edit workspace_dir → absolute path to your workspace
+# Enable channels: telegram, orb</code></pre>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <h3>Set API keys</h3>
+          <pre><code>cp .env.example .env
+# Add: TELEGRAM_BOT_TOKEN, FISH_API_KEY (or OPENAI_API_KEY)</code></pre>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">05</div>
+        <div class="step-content">
+          <h3>Install dependencies and start</h3>
+          <pre><code>pip install -r requirements.txt
+
+start.bat          # Windows
+bash start.sh      # Linux / macOS</code></pre>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">06</div>
+        <div class="step-content">
+          <h3>Verify</h3>
+          <pre><code>curl http://localhost:8787/status
+
+curl -X POST http://localhost:8787/message \
+  -H "Content-Type: application/json" \
+  -d '{"text": "hello, who are you?", "channel": "http"}'</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:3rem; padding:2rem; background:var(--bg2); border:1px solid var(--border2);">
+      <h3 style="margin-bottom:1rem;">Reference Workspace</h3>
+      <p>
+        See <a href="https://github.com/EduardoAllen02/openghost-workspace" target="_blank" style="color:var(--accent);">EduardoAllen02/openghost-workspace</a>
+        for a production workspace with custom protocols, skills (Spotify, Canva, Google APIs),
+        and a fully configured agent identity.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1.5rem; width:100%;">
+    <div class="footer-logo">OPEN<span>GHOST</span></div>
+    <ul class="footer-links">
+      <li><a href="https://github.com/EduardoAllen02/openghost" target="_blank">GitHub</a></li>
+      <li><a href="docs/architecture.md">Docs</a></li>
+      <li><a href=".env.example">.env.example</a></li>
+    </ul>
+    <div class="footer-copy">Built from scratch. Inspired by OpenClaw.</div>
+  </div>
+</footer>
+
+</body>
+</html>

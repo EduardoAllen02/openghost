@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data:;">
+  <title>Lucy</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: -apple-system, 'Segoe UI', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* ── Titlebar ─────────────────────────────────────────────────────────── */
+    #titlebar {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 8px;
+      -webkit-app-region: drag;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      flex-shrink: 0;
+    }
+
+    /* Botones de ventana (izquierda) */
+    #titlebar .win-btns {
+      display: flex;
+      gap: 5px;
+      -webkit-app-region: no-drag;
+      flex-shrink: 0;
+    }
+    .win-btn {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .win-btn:hover { opacity: 1; }
+    #btn-close    { background: #ff5f57; }
+    #btn-minimize { background: #febc2e; }
+
+    /* Nombre centrado */
+    #title-name {
+      flex: 1;
+      text-align: center;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.25);
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    /* Controles derecha (no-drag) */
+    #titlebar .right-btns {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      -webkit-app-region: no-drag;
+      flex-shrink: 0;
+    }
+
+    /* Botón Gateway / New */
+    .ctrl-btn {
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.35);
+      font-size: 9px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+    .ctrl-btn:hover { background: rgba(80,120,255,0.2); color: rgba(255,255,255,0.7); }
+    #btn-gateway.running { color: #00ff88; border-color: rgba(0,255,136,0.3); }
+    #btn-new:hover { background: rgba(255,180,0,0.15); color: rgba(255,200,80,0.9); }
+
+    /* Separador */
+    .sep {
+      width: 1px;
+      height: 14px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* Mic button states */
+    #btn-mic.mic-vad       { color: #00ff88; border-color: rgba(0,255,136,0.3); }
+    #btn-mic.mic-recording { color: #ff3333; border-color: rgba(255,50,50,0.4); animation: mic-pulse 0.7s ease-in-out infinite; }
+    #btn-mic.mic-ptt       { color: #ffcc00; border-color: rgba(255,200,0,0.3); }
+
+    @keyframes mic-pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.45; }
+    }
+
+    /* Indicador offline en titlebar */
+    #offline-badge {
+      font-size: 8px;
+      color: #ff5555;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 0.4s;
+      pointer-events: none;
+    }
+    #offline-badge.visible { opacity: 1; }
+
+    /* ── Tab bar ──────────────────────────────────────────────────────────── */
+    #tab-bar {
+      display: flex;
+      height: 28px;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+    }
+    .tab {
+      flex: 1;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.25);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+      position: relative;
+    }
+    .tab:hover { color: rgba(255,255,255,0.55); }
+    .tab.active {
+      color: rgba(255,255,255,0.85);
+      border-bottom-color: rgba(80,120,255,0.7);
+    }
+
+    /* ── Tab panels ───────────────────────────────────────────────────────── */
+    .tab-panel {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .tab-panel.active { display: flex; }
+
+    /* ── Tab: Orb ─────────────────────────────────────────────────────────── */
+    #canvas-container {
+      flex: 1;
+      position: relative;
+      min-height: 0;
+    }
+    #orb-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    #status-dot {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #333;
+      transition: background 0.4s;
+    }
+    #status-dot.connected { background: #00ff88; box-shadow: 0 0 6px #00ff88; }
+    #status-dot.thinking  { background: #ff9900; box-shadow: 0 0 6px #ff9900; }
+    #status-dot.speaking  { background: #cc88ff; box-shadow: 0 0 6px #cc88ff; }
+    #status-dot.listening { background: #00ffcc; box-shadow: 0 0 6px #00ffcc; }
+
+    /* Última respuesta de Lucy */
+    #last-msg {
+      padding: 6px 12px 4px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+      min-height: 20px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      background: rgba(255,255,255,0.02);
+      flex-shrink: 0;
+    }
+
+    /* Chat input */
+    #chat-area {
+      padding: 8px 12px 12px;
+      background: rgba(255,255,255,0.03);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+    }
+    #chat-form {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    #chat-input {
+      flex: 1;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 8px 14px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #chat-input::placeholder { color: rgba(255,255,255,0.25); }
+    #chat-input:focus { border-color: rgba(100,150,255,0.4); }
+    #chat-input:disabled { opacity: 0.3; }
+    #send-btn {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(80,120,255,0.3);
+      color: rgba(255,255,255,0.7);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.1s;
+      flex-shrink: 0;
+    }
+    #send-btn:hover  { background: rgba(80,120,255,0.5); }
+    #send-btn:active { transform: scale(0.92); }
+    #send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ── Tab: Logs ─────────────────────────────────────────────────────────── */
+    #tab-panel-logs {
+      overflow: hidden;
+    }
+    #log-viewer {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 12px;
+      font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+      font-size: 10px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.55);
+      background: #000;
+      user-select: text;
+      cursor: text;
+    }
+    #log-viewer::-webkit-scrollbar { width: 4px; }
+    #log-viewer::-webkit-scrollbar-track { background: transparent; }
+    #log-viewer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    .log-line { white-space: pre-wrap; word-break: break-all; margin-bottom: 1px; user-select: text; }
+    .log-line.stderr { color: rgba(255,100,80,0.75); }
+    .log-line.info   { color: rgba(80,160,255,0.4); font-style: italic; }
+
+    /* ── Tab: Chat ─────────────────────────────────────────────────────────── */
+    #tab-panel-chat {
+      overflow: hidden;
+    }
+    #chat-history {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      user-select: text;
+      cursor: text;
+    }
+    #chat-history::-webkit-scrollbar { width: 4px; }
+    #chat-history::-webkit-scrollbar-track { background: transparent; }
+    #chat-history::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    #chat-empty {
+      color: rgba(255,255,255,0.15);
+      font-size: 11px;
+      text-align: center;
+      margin-top: 40px;
+      letter-spacing: 1px;
+      user-select: none;
+      cursor: default;
+    }
+    .chat-bubble {
+      max-width: 88%;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      word-break: break-word;
+      user-select: text;
+    }
+    .chat-bubble strong { color: rgba(255,255,255,0.95); }
+    .chat-bubble em { color: rgba(200,215,255,0.85); font-style: italic; }
+    .chat-bubble code {
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 11px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      padding: 1px 4px;
+      color: rgba(140,220,255,0.9);
+    }
+    .chat-bubble.user {
+      align-self: flex-end;
+      background: rgba(80,120,255,0.2);
+      border: 1px solid rgba(80,120,255,0.3);
+      color: rgba(200,215,255,0.9);
+      border-bottom-right-radius: 4px;
+    }
+    .chat-bubble.assistant {
+      align-self: flex-start;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.75);
+      border-bottom-left-radius: 4px;
+    }
+    .chat-bubble .role-label {
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      opacity: 0.45;
+    }
+
+    /* Input compartido en tab Chat */
+    .chat-area-shared {
+      padding: 8px 12px 12px;
+      background: rgba(255,255,255,0.03);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+    }
+    .chat-area-shared form {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    #chat-input-tab {
+      flex: 1;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 8px 14px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #chat-input-tab::placeholder { color: rgba(255,255,255,0.25); }
+    #chat-input-tab:focus { border-color: rgba(100,150,255,0.4); }
+    #chat-input-tab:disabled { opacity: 0.3; }
+    #send-btn-tab {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(80,120,255,0.3);
+      color: rgba(255,255,255,0.7);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.1s;
+      flex-shrink: 0;
+    }
+    #send-btn-tab:hover  { background: rgba(80,120,255,0.5); }
+    #send-btn-tab:active { transform: scale(0.92); }
+    #send-btn-tab:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* Audio element oculto */
+    #audio-player { display: none; }
+
+    /* ── File attachments ────────────────────────────────────────────────── */
+    #img-preview-area, #img-preview-area-tab {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px;
+    }
+    #img-preview-area:empty, #img-preview-area-tab:empty { display: none; }
+    .img-thumb-wrap { position: relative; }
+    .img-thumb {
+      width: 48px; height: 48px; object-fit: cover;
+      border-radius: 6px; border: 1px solid rgba(255,255,255,0.15);
+    }
+    .file-badge {
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 8px; border-radius: 6px;
+      background: rgba(170,255,0,0.1); border: 1px solid rgba(170,255,0,0.25);
+      color: rgba(255,255,255,0.8); font-size: 10px; max-width: 120px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .img-thumb-rm {
+      position: absolute; top: -4px; right: -4px;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: rgba(255,60,60,0.8); color: #fff;
+      font-size: 9px; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #file-input, #file-input-tab { display: none; }
+    #attach-btn, #attach-btn-tab {
+      background: none; border: none; color: rgba(255,255,255,0.35);
+      font-size: 16px; cursor: pointer; padding: 0 2px; flex-shrink: 0;
+    }
+    #attach-btn:hover, #attach-btn-tab:hover { color: rgba(255,255,255,0.7); }
+
+  </style>
+</head>
+<body>
+
+  <!-- ── Titlebar ─────────────────────────────────────────────────────────── -->
+  <div id="titlebar">
+    <div class="win-btns">
+      <button class="win-btn" id="btn-close"    title="Cerrar"></button>
+      <button class="win-btn" id="btn-minimize" title="Minimizar"></button>
+    </div>
+
+    <span id="title-name">Lucy</span>
+    <span id="offline-badge">● offline</span>
+
+    <div class="right-btns">
+      <button class="ctrl-btn" id="btn-new"     title="Nueva sesión">New</button>
+      <button class="ctrl-btn" id="btn-gateway" title="Iniciar / reiniciar gateway">Gateway</button>
+      <button class="ctrl-btn" id="btn-mic"     title="Activar micrófono">MIC</button>
+    </div>
+  </div>
+
+  <!-- ── Tab bar ───────────────────────────────────────────────────────────── -->
+  <div id="tab-bar">
+    <button class="tab active" data-tab="orb">Orb</button>
+    <button class="tab"        data-tab="logs">Logs</button>
+    <button class="tab"        data-tab="chat">Chat</button>
+  </div>
+
+  <!-- ── Tab: Orb ──────────────────────────────────────────────────────────── -->
+  <div id="tab-panel-orb" class="tab-panel active">
+    <div id="canvas-container">
+      <canvas id="orb-canvas"></canvas>
+      <div id="status-dot"></div>
+    </div>
+    <div id="last-msg">Iniciando...</div>
+    <div id="chat-area">
+      <div id="img-preview-area"></div>
+      <input type="file" id="file-input" accept="image/*,.pdf,.txt,.md,.py,.js,.ts,.tsx,.jsx,.json,.yaml,.yml,.csv,.html,.css,.sql,.sh,.go,.rs,.java,.cpp,.c,.toml,.xml,.log" multiple>
+      <form id="chat-form">
+        <button id="attach-btn" type="button" title="Adjuntar archivo">📎</button>
+        <input id="chat-input" type="text" placeholder="Habla con Lucy..." autocomplete="off" disabled>
+        <button id="send-btn" type="submit" disabled>↑</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Tab: Logs ─────────────────────────────────────────────────────────── -->
+  <div id="tab-panel-logs" class="tab-panel">
+    <div id="log-viewer"></div>
+  </div>
+
+  <!-- ── Tab: Chat ─────────────────────────────────────────────────────────── -->
+  <div id="tab-panel-chat" class="tab-panel">
+    <div id="chat-history">
+      <div id="chat-empty">Sin mensajes aún</div>
+    </div>
+    <div id="chat-area-tab" class="chat-area-shared">
+      <div id="img-preview-area-tab"></div>
+      <input type="file" id="file-input-tab" accept="image/*,.pdf,.txt,.md,.py,.js,.ts,.tsx,.jsx,.json,.yaml,.yml,.csv,.html,.css,.sql,.sh,.go,.rs,.java,.cpp,.c,.toml,.xml,.log" multiple>
+      <form id="chat-form-tab">
+        <button id="attach-btn-tab" type="button" title="Adjuntar archivo">📎</button>
+        <input id="chat-input-tab" type="text" placeholder="Escribe un mensaje..." autocomplete="off" disabled>
+        <button id="send-btn-tab" type="submit" disabled>↑</button>
+      </form>
+    </div>
+  </div>
+
+  <audio id="audio-player"></audio>
+
+  <!-- Three.js desde CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="orb.js"></script>
+</body>
+</html>

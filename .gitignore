@@ -1,0 +1,14 @@
+.env
+state/
+__pycache__/
+*.pyc
+*.pyo
+node_modules/
+channels/orb/node_modules/
+channels/orb/dist/
+*.log
+.DS_Store
+Thumbs.db
+config.json
+channels/telegram/allowlist.json
+.claude/

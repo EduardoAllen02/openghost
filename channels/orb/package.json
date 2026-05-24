@@ -1,0 +1,16 @@
+{
+  "name": "lucy-orb",
+  "version": "1.0.0",
+  "description": "Lucy PC — Electron orb interface",
+  "main": "main.js",
+  "scripts": {
+    "start": "node launcher.js",
+    "dev": "node launcher.js --dev"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^36.0.0"
+  }
+}
