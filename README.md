@@ -2,7 +2,9 @@
 
 **An agentic framework for running a persistent, autonomous AI agent on your own machine.**
 
-OpenGhost wraps [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) into a daemon with multi-channel communication (Telegram, voice orb), a modular skill system, layered memory architecture, and a prompt engineering philosophy built from scratch — inspired by OpenClaw.
+OpenGhost wraps **[Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)** into a daemon with multi-channel communication (Telegram, voice orb), a modular skill system, layered memory architecture, and a prompt engineering philosophy built from scratch — inspired by OpenClaw.
+
+> **Important:** OpenGhost does not use the Anthropic API directly. It invokes **Claude Code** — Anthropic's CLI tool — as a subprocess. You need Claude Code installed and authenticated on your machine (`npm i -g @anthropic-ai/claude-code`). Claude Code manages its own authentication and session continuity.
 
 > **Two repos, one system:**
 > `OpenGhost` (this) — the reusable engine: daemon, channels, TTS proxy.
@@ -201,7 +203,7 @@ Configure in `config.json → tts.provider`.
 
 - Python 3.12+
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) — `npm i -g @anthropic-ai/claude-code`
-- An Anthropic API key configured for Claude Code
+- Claude Code authenticated (`claude` should work in your terminal — it handles auth internally, no raw API key needed in this project)
 
 ### Setup
 
@@ -305,9 +307,11 @@ Fill in `SOUL.md`, `IDENTITY.md`, and `USER.md` before first run. `AGENTS.md` is
 
 ---
 
-## Reference Workspace
+## Your Workspace Is Private
 
-See [EduardoAllen02/openghost-workspace](https://github.com/EduardoAllen02/openghost-workspace) for a real production workspace with custom protocols, skills (Spotify, Canva, Google APIs), and a fully configured agent identity.
+The workspace (`openghost-workspace/`) is where your agent's identity, memory, and skills live. It contains personal information — who the agent is, who the user is, daily logs, long-term memory — and should be kept in a **private repo**.
+
+The `workspace_template/` folder in this repo is your starting point. Copy it, fill in `SOUL.md`, `IDENTITY.md`, and `USER.md`, and point `config.json → workspace_dir` at it. The engine never touches your workspace directly — it only reads `workspace_dir` from config and passes it to Claude Code as the working directory.
 
 ---
 
