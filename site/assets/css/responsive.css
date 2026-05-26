@@ -1,0 +1,13 @@
+@media (max-width: 768px) {
+  nav { padding: 0 1.25rem; }
+  .nav-links { display: none; }
+  .container { padding: 0 1.25rem; }
+  h1 { font-size: 3rem; }
+  .hero-stats { gap: 2rem; }
+  .context-split { grid-template-columns: 1fr; }
+  footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+  .protocol-item { flex-direction: column; gap: 0.5rem; }
+  .protocol-name { min-width: unset; }
+  .install-step { grid-template-columns: 1fr; }
+  .step-num { display: none; }
+}

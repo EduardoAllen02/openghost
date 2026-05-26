@@ -1,0 +1,197 @@
+section {
+  padding: 6rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.section-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.section-lead {
+  font-size: 1.05rem;
+  color: var(--text2);
+  max-width: 640px;
+  line-height: 1.75;
+  margin-bottom: 3rem;
+}
+
+/* ── Philosophy ── */
+.principles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 3rem;
+}
+
+.principle {
+  background: var(--bg);
+  padding: 2rem;
+  transition: background 0.2s;
+}
+
+.principle:hover { background: var(--bg2); }
+
+.principle-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  margin-bottom: 1rem;
+}
+
+.principle h3 { margin-bottom: 0.5rem; }
+
+/* ── Architecture ── */
+.arch-diagram {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  padding: 2rem;
+  overflow-x: auto;
+  margin: 2rem 0;
+}
+
+.arch-diagram pre {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text2);
+  line-height: 1.8;
+  white-space: pre;
+}
+
+.arch-diagram pre .hl { color: var(--accent); }
+
+/* ── Context ── */
+.context-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+.context-col {
+  background: var(--bg);
+  padding: 2rem;
+}
+
+.context-col h3 { margin-bottom: 1rem; color: var(--white); }
+
+.context-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.context-list li {
+  font-size: 0.875rem;
+  color: var(--text2);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.context-list li::before {
+  content: '—';
+  color: var(--accent);
+  flex-shrink: 0;
+  font-family: 'Space Mono', monospace;
+}
+
+/* ── Skills ── */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 2rem;
+}
+
+.skill-card {
+  background: var(--bg);
+  padding: 1.75rem;
+  transition: background 0.2s;
+}
+
+.skill-card:hover { background: var(--bg2); }
+
+.skill-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--accent);
+  background: var(--accent-dim);
+  padding: 0.2rem 0.6rem;
+  display: inline-block;
+  margin-bottom: 1rem;
+  letter-spacing: 0.1em;
+}
+
+.skill-card h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+
+/* ── Protocols ── */
+.protocol-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 2rem;
+}
+
+.protocol-item {
+  background: var(--bg);
+  padding: 1.5rem 2rem;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  transition: background 0.2s;
+}
+
+.protocol-item:hover { background: var(--bg2); }
+
+.protocol-name {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--accent);
+  min-width: 160px;
+  padding-top: 0.15rem;
+  letter-spacing: 0.05em;
+}
+
+/* ── Install ── */
+.install-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+.install-step {
+  background: var(--bg);
+  padding: 1.5rem 2rem;
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.step-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--border2);
+  line-height: 1;
+}
+
+.step-content h3 { margin-bottom: 0.5rem; font-size: 1rem; }
